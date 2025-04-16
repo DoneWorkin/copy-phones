@@ -7,7 +7,7 @@ from datetime import datetime
 # constants that contain likely changing stuff -------------------------------------------------------------
 
 # application version for display at the top
-APPLICATION_VERSION = 'v2025-04-15.2'
+APPLICATION_VERSION = 'v2025-04-16.1'
 
 # used to check if the memory card is in the computer - this directory is checked for
 BLOG_CHECK_LOC_LINUX = r"/media/rick/BlogSD/Original Photos"
@@ -83,7 +83,8 @@ def check_connection():
     # test to make sure computer and phone are on same time
     result = subprocess.run(['adb', 'shell', "date +'%Y-%m-%d %H:%M:%S'"], stdout=subprocess.PIPE)
     res = str(result)
-    print (res)
+    #print (res)
+    
     if isLinux:
         res = res[res.find("=b'")+3:res.rfind("n")-1]
     else:
@@ -177,25 +178,43 @@ def test_copy():
     if totalCopy > 0:
          txt_edit.insert(tk.END, copyItems + '\n')
 
+    #color code the lines based upon how many to copy
+    if totalDelete < 20:
+        tagDelete = 'tag_green'   
+    elif totalDelete < 50:
+        tagDelete = 'tag_orange'
+    else:
+        tagDelete = 'tag_red'
+        
+    if totalCopy < 100:
+        tagCopy = 'tag_green'   
+    elif totalCopy < 200:
+        tagCopy = 'tag_orange'
+    else:
+        tagCopy = 'tag_red'
+
     txt_edit.insert(tk.END, 'Summary\n','tag_orange')
     txt_edit.insert(tk.END, '------------------\n','tag_orange')
 
     if totalDelete == 0:
-        txt_edit.insert(tk.END, 'DELETE: No ' + imageType + ' to delete from the blog\n','tag_orange')
+        txt_edit.insert(tk.END, 'DELETE: No ' + imageType + ' to delete from the blog\n','tag_green')
     else:
-        txt_edit.insert(tk.END, 'DELETE: Going to delete ' + str(totalDelete -1) + ' ' + imageType + ' from the blog\n','tag_orange')              
+        txt_edit.insert(tk.END, 'DELETE: Going to delete ' + str(totalDelete -1) + ' ' + imageType + ' from the blog\n',tagDelete)              
  
     if totalCopy == 0:
-        txt_edit.insert(tk.END, 'COPY: No ' + imageType + 's to copy to the blog\n','tag_orange')
+        txt_edit.insert(tk.END, 'COPY: No ' + imageType + 's to copy to the blog\n','tag_green')
     else:
-        txt_edit.insert(tk.END, 'COPY: Going to copy ' + str(totalCopy - 1) + ' ' + imageType + ' to the blog\n','tag_orange')
+        txt_edit.insert(tk.END, 'COPY: Going to copy ' + str(totalCopy - 1) + ' ' + imageType + ' to the blog\n',tagCopy)
    
     txt_edit.insert(tk.END, '------------------\n','tag_orange')
 
     if emptyCopy and emptyDelete:
         txt_edit.insert(tk.END, '\nYOU ARE DONE NOW - NOTHING TO DO!\n','tag_green')
         return
-
+        
+    if (totalDelete > 100) or (totalCopy > 300):
+        txt_edit.insert(tk.END, '\nWARNING: This looks really big - ARE YOU SURE????\n','tag_red')
+    
     txt_edit.insert(tk.END, '\nIf everything above looks fine then click the "Execute" button\n','tag_green')
     txt_edit.see('end')
     copyReady = True
