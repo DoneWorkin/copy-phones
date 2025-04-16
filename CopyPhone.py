@@ -3,10 +3,11 @@ import tkinter as tk
 import subprocess
 import platform
 import os
+from datetime import datetime
 # constants that contain likely changing stuff -------------------------------------------------------------
 
 # application version for display at the top
-APPLICATION_VERSION = 'v2025-01-30.3'
+APPLICATION_VERSION = 'v2025-04-15.1'
 
 # used to check if the memory card is in the computer - this directory is checked for
 BLOG_CHECK_LOC_LINUX = r"/media/rick/BlogSD/Original Photos"
@@ -77,6 +78,23 @@ def check_connection():
     else:
         txt_edit.insert(tk.END, "UNKNOWN OR MISSING PHONE - FIX AND TRY AGAIN\n",'tag_red')
         print(res)
+        return
+    
+    # test to make sure computer and phone are on same time
+    result = subprocess.run(['adb', 'shell', "date +'%Y-%m-%d %H:%M:%S'"], stdout=subprocess.PIPE)
+    res = str(result)
+    res = res[res.find("=b'")+3:res.rfind("n")-1]
+    phoneTime = datetime.strptime(res, '%Y-%m-%d %H:%M:%S')
+    
+    # Get current date and time
+    now = datetime.now()
+    computerTime = now
+    timeDiff = computerTime - phoneTime
+
+    
+    if (abs(timeDiff.total_seconds()) > 600):
+        txt_edit.insert(tk.END, "TIME ON PHONE / COMPUTER DON'T MATCH - FIX, RESTART, AND TRY AGAIN\n",'tag_red')
+        print (timeDiff.total_seconds())
         return
         
     connectionOK = True
